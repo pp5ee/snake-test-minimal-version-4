@@ -31,18 +31,26 @@
   const historyEmpty    = document.getElementById("history-empty");
 
   // ── Game state ─────────────────────────────────────────────
-  let snake, direction, nextDirection, apple, score, loopId, running;
+  const state = {
+    snake: [],
+    direction: DIR.RIGHT,
+    nextDirection: DIR.RIGHT,
+    apple: null,
+    score: 0,
+    loopId: null,
+    running: false
+  };
 
   // ── Initialise / reset ─────────────────────────────────────
   function initGame() {
     const startCol = Math.floor(COLS / 2);
     const startRow = Math.floor(ROWS / 2);
 
-    snake         = [{ x: startCol, y: startRow }];
-    direction     = DIR.RIGHT;
-    nextDirection = DIR.RIGHT;
-    score         = 0;
-    running       = false;
+    state.snake         = [{ x: startCol, y: startRow }];
+    state.direction     = DIR.RIGHT;
+    state.nextDirection = DIR.RIGHT;
+    state.score         = 0;
+    state.running       = false;
 
     spawnApple();
     updateScoreDisplay();
@@ -51,55 +59,63 @@
 
   // ── Apple placement ────────────────────────────────────────
   function spawnApple() {
-    let pos;
     do {
-      pos = {
+      state.apple = {
         x: Math.floor(Math.random() * COLS),
         y: Math.floor(Math.random() * ROWS),
       };
-    } while (snake.some(seg => seg.x === pos.x && seg.y === pos.y));
-    apple = pos;
+    } while (state.snake.some(seg => seg.x === state.apple.x && seg.y === state.apple.y));
   }
 
   // ── Game loop ──────────────────────────────────────────────
   function startLoop() {
-    if (loopId) clearInterval(loopId);
-    running = true;
-    loopId  = setInterval(tick, TICK_MS);
+    if (state.loopId) clearInterval(state.loopId);
+    state.running = true;
+    state.loopId  = setInterval(tick, TICK_MS);
+  }
+
+  function isCollision(head) {
+    // Wall collision
+    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+      return true;
+    }
+    // Self collision
+    if (state.snake.some(seg => seg.x === head.x && seg.y === head.y)) {
+      return true;
+    }
+    return false;
   }
 
   function tick() {
-    direction = nextDirection;
+    state.direction = state.nextDirection;
 
-    const head    = snake[0];
+    const head    = state.snake[0];
     const newHead = { x: head.x, y: head.y };
 
-    if (direction === DIR.UP)    newHead.y -= 1;
-    if (direction === DIR.DOWN)  newHead.y += 1;
-    if (direction === DIR.LEFT)  newHead.x -= 1;
-    if (direction === DIR.RIGHT) newHead.x += 1;
+    const directionMap = {
+      [DIR.UP]:    { x: 0, y: -1 },
+      [DIR.DOWN]:  { x: 0, y: 1 },
+      [DIR.LEFT]:  { x: -1, y: 0 },
+      [DIR.RIGHT]: { x: 1, y: 0 }
+    };
+    const move = directionMap[state.direction];
+    newHead.x += move.x;
+    newHead.y += move.y;
 
-    // Wall collision
-    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+    if (isCollision(newHead)) {
       endGame();
       return;
     }
 
-    // Self collision
-    if (snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
-      endGame();
-      return;
-    }
-
-    snake.unshift(newHead);
+    state.snake.unshift(newHead);
 
     // Apple eaten
-    if (newHead.x === apple.x && newHead.y === apple.y) {
-      score += 1;
+    if (newHead.x === state.apple.x && newHead.y === state.apple.y) {
+      state.score += 1;
       updateScoreDisplay();
       spawnApple();
     } else {
-      snake.pop();
+      state.snake.pop();
     }
 
     draw();
@@ -107,15 +123,15 @@
 
   // ── End game ───────────────────────────────────────────────
   function endGame() {
-    clearInterval(loopId);
-    running = false;
+    clearInterval(state.loopId);
+    state.running = false;
 
-    saveScore(score);
+    saveScore(state.score);
     renderHistory();
     updateBestScore();
 
-    finalScoreText.textContent = "Score: " + score;
-    showOverlay(gameoverOverlay);
+    finalScoreText.textContent = "Score: " + state.score;
+    showOverlay("gameover");
   }
 
   // ── Drawing ────────────────────────────────────────────────
@@ -144,8 +160,8 @@
     ctx.fillStyle = "#e05c5c";
     ctx.beginPath();
     ctx.arc(
-      apple.x * CELL_SIZE + CELL_SIZE / 2,
-      apple.y * CELL_SIZE + CELL_SIZE / 2,
+      state.apple.x * CELL_SIZE + CELL_SIZE / 2,
+      state.apple.y * CELL_SIZE + CELL_SIZE / 2,
       CELL_SIZE / 2 - 2,
       0,
       Math.PI * 2
@@ -153,7 +169,7 @@
     ctx.fill();
 
     // Snake
-    snake.forEach((seg, idx) => {
+    state.snake.forEach((seg, idx) => {
       ctx.fillStyle = idx === 0 ? "#4ecca3" : "#2ea882";
       const padding = 1;
       ctx.fillRect(
@@ -167,7 +183,7 @@
 
   // ── Score display ──────────────────────────────────────────
   function updateScoreDisplay() {
-    currentScoreEl.textContent = score;
+    currentScoreEl.textContent = state.score;
   }
 
   function updateBestScore() {
@@ -177,15 +193,15 @@
   }
 
   // ── Overlay helpers ────────────────────────────────────────
-  function showOverlay(el) {
-    startOverlay.classList.add("hidden");
-    gameoverOverlay.classList.add("hidden");
-    el.classList.remove("hidden");
+  const overlays = { start: startOverlay, gameover: gameoverOverlay };
+
+  function showOverlay(name) {
+    Object.values(overlays).forEach(el => el.classList.add("hidden"));
+    overlays[name].classList.remove("hidden");
   }
 
   function hideOverlays() {
-    startOverlay.classList.add("hidden");
-    gameoverOverlay.classList.add("hidden");
+    Object.values(overlays).forEach(el => el.classList.add("hidden"));
   }
 
   // ── localStorage helpers ───────────────────────────────────
@@ -263,10 +279,21 @@
     if (!running) return;
 
     // Direction keys (prevent reverse)
-    if ((key === "ArrowUp"    || key === "w" || key === "W") && direction !== DIR.DOWN)  nextDirection = DIR.UP;
-    if ((key === "ArrowDown"  || key === "s" || key === "S") && direction !== DIR.UP)    nextDirection = DIR.DOWN;
-    if ((key === "ArrowLeft"  || key === "a" || key === "A") && direction !== DIR.RIGHT) nextDirection = DIR.LEFT;
-    if ((key === "ArrowRight" || key === "d" || key === "D") && direction !== DIR.LEFT)  nextDirection = DIR.RIGHT;
+    const keyMap = {
+      'ArrowUp':    { dir: DIR.UP,    opposite: DIR.DOWN },
+      'w':          { dir: DIR.UP,    opposite: DIR.DOWN },
+      'ArrowDown':  { dir: DIR.DOWN,  opposite: DIR.UP },
+      's':          { dir: DIR.DOWN,  opposite: DIR.UP },
+      'ArrowLeft':  { dir: DIR.LEFT,  opposite: DIR.RIGHT },
+      'a':          { dir: DIR.LEFT,  opposite: DIR.RIGHT },
+      'ArrowRight': { dir: DIR.RIGHT, opposite: DIR.LEFT },
+      'd':          { dir: DIR.RIGHT, opposite: DIR.LEFT }
+    };
+
+    const mapping = keyMap[key];
+    if (mapping && state.direction !== mapping.opposite) {
+      state.nextDirection = mapping.dir;
+    }
 
     // Prevent page scroll on arrow keys
     if (key.startsWith("Arrow")) e.preventDefault();
