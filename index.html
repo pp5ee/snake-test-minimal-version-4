@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snake Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-wrapper">
+    <h1>Snake</h1>
+
+    <section class="score-bar">
+      <div class="score-item">
+        <span class="score-label">Score</span>
+        <span class="score-value" id="current-score">0</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">Best</span>
+        <span class="score-value" id="best-score">0</span>
+      </div>
+    </section>
+
+    <div class="canvas-container">
+      <canvas id="game-canvas" width="400" height="400"></canvas>
+
+      <!-- Overlays rendered on top of the canvas -->
+      <div class="overlay" id="start-overlay">
+        <p class="overlay-title">Snake</p>
+        <p class="overlay-hint">Press <kbd>Enter</kbd> to start</p>
+        <p class="overlay-hint small">Arrow keys or WASD to move</p>
+      </div>
+
+      <div class="overlay hidden" id="gameover-overlay">
+        <p class="overlay-title">Game Over</p>
+        <p class="overlay-score" id="final-score-text">Score: 0</p>
+        <button class="btn-restart" id="restart-btn">Play Again</button>
+      </div>
+    </div>
+
+    <p class="controls-hint">Arrow keys / WASD &nbsp;·&nbsp; Enter to start or restart</p>
+
+    <section class="history-section">
+      <div class="history-header">
+        <h2>Score History</h2>
+        <button class="btn-clear" id="clear-history-btn">Clear</button>
+      </div>
+      <ul class="history-list" id="history-list">
+        <!-- Score entries are injected here by game.js -->
+      </ul>
+      <p class="history-empty" id="history-empty">No games played yet.</p>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
