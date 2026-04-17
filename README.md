@@ -9,29 +9,26 @@ A simple, self-contained Snake game built with HTML5 Canvas and JavaScript. Feat
 - 💾 Score persistence using localStorage
 - 📊 Score history with timestamps
 - 🎯 Clean, modern UI with responsive design
-- ⏸️ Pause/Resume functionality
-- 🔄 Restart game with one click
+- 🔄 Restart after game over
 - 🧹 Clear score history option
 
 ## Quick Start
 
 1. Clone or download this repository
 2. Open `index.html` in a modern web browser
-3. Press **Enter** or click **Start** to begin
+3. Press **Enter** to start
 4. Use **Arrow Keys** or **WASD** to control the snake
-5. Press **Space** to pause/resume the game
 
 ## Game Controls
 
 | Action | Primary | Alternative |
 |--------|---------|-------------|
-| Start Game | Enter | Start Button |
+| Start Game | Enter | - |
 | Move Up | ↑ Arrow | W |
 | Move Down | ↓ Arrow | S |
 | Move Left | ← Arrow | A |
 | Move Right | → Arrow | D |
-| Pause/Resume | Space | - |
-| Restart | - | Restart Button |
+| Restart (after game over) | Button | Enter |
 
 ## Game Rules
 
@@ -74,7 +71,7 @@ A simple, self-contained Snake game built with HTML5 Canvas and JavaScript. Feat
 
 ### JavaScript (`game.js`)
 - Modular game architecture
-- RequestAnimationFrame-based game loop
+- Interval-based game loop (150ms tick)
 - Collision detection system
 - localStorage integration for persistence
 - Keyboard input handling
@@ -132,6 +129,26 @@ This project was built following RLCR (Read-Learn-Code-Review) methodology:
 - No external dependencies
 - Cross-browser compatibility
 
+## Prerequisites
+
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+
+## Installation
+
+1. Clone or download this repository
+2. Open `index.html` directly in your browser (no server required)
+
+## Configuration
+
+No configuration is required. Default settings:
+- Grid: 20×20 cells (400×400px canvas)
+- Tick rate: 150ms per update
+- Storage key: `snake_history`
+
+## Usage Example
+
+Open `index.html`, press Enter to start, use Arrow Keys/WASD to move. After game over, click “Play Again” or press Enter to restart. Scores persist automatically in localStorage and appear in the Score History list.
+
 ## Testing
 
 To test the game functionality:
@@ -145,7 +162,7 @@ To test the game functionality:
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+No license file is included in this test project. Add one if you intend to distribute.
 
 ## Contributing
 
